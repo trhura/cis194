@@ -1,9 +1,11 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 import ExprT
 import Parser
 import Control.Applicative
 import qualified Data.Map as M
+import qualified StackVM as VM
 
 eval :: ExprT -> Integer
 eval (Lit x) = x
@@ -59,6 +61,14 @@ instance Expr (M.Map String Integer -> Maybe Integer) where
     lit i = (\m -> Just i)
     mul a b = (\m -> (*) <$> (a m) <*> (b m))
     add a b = (\m -> (+) <$> (a m) <*> (b m))
+
+instance Expr VM.Program where
+    lit i = [VM.PushI i]
+    mul a b = b ++ a ++ [VM.Mul]
+    add a b = b ++ a ++ [VM.Add]
+
+compile :: String -> Maybe VM.Program
+compile = parseExp lit add mul
 
 withVars :: [(String, Integer)]
             -> (M.Map String Integer -> Maybe Integer)
