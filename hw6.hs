@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-missing-methods #-}
+
 import Data.List
 
 fib1 :: Integer -> Integer
@@ -56,3 +59,12 @@ interleaveStreams (Stream a next) b = Stream a (interleaveStreams b next)
 
 ruler :: Stream Integer
 ruler = interleaveStreams (streamRepeat 0) (streamMap findLargestDivisorPow2 evens)
+
+x :: Stream Integer
+x = Stream 0 $ Stream 1 $ streamRepeat 0
+
+instance Num (Stream Integer) where
+    fromInteger n = Stream n $ streamRepeat 0
+    negate = streamMap (0-)
+    (+) (Stream a an) (Stream b bn) = Stream (a + b) ((+) an bn)
+    (*) (Stream a an) bs@(Stream b bn) = Stream (a * b) ((+) (streamMap (*a) bn) ((*) an bs))
