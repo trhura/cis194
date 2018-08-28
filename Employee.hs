@@ -45,7 +45,7 @@ testCompany2
     ]
 
 -- A type to store a list of guests and their total fun score.
-data GuestList = GL [Employee] Fun
+data GuestList =  GL [Employee] Fun
   deriving (Show, Eq)
 
 instance Ord GuestList where
