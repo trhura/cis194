@@ -1,5 +1,6 @@
 import          Employee
 import          Data.Tree
+import          Data.List
 import          Debug.Trace
 
 moreFun :: GuestList -> GuestList -> GuestList
@@ -37,3 +38,14 @@ breadthFold b fn (Node { rootLabel = emp, subForest = xs}) = fn emp (map (breadt
 -- maxFun :: Tree Employee -> GuestList
 maxFun tree = max with without
                 where (with, without) = breadthFold (emptyGL, emptyGL) nextLevel tree
+
+
+readEmployees :: String -> Tree Employee
+readEmployees = read
+
+main = do
+    contents <- readFile "company.txt"
+    let employees = read contents :: Tree Employee
+    let (GL emps fun) = maxFun employees
+    putStrLn ("Total fun: " ++ show fun)
+    mapM (putStrLn . empName) (sortOn empName emps)
