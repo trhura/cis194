@@ -15,3 +15,18 @@ instance Applicative Parser where
                                 Nothing -> Nothing
                                 Just (fn, xs) -> first fn (runParser p2 xs)
         }
+
+abParser :: Parser (Char, Char)
+abParser = (,) <$> (char 'a') <*> (char 'b')
+
+abParser_ :: Parser ()
+abParser_ = (\x y -> ()) <$> (char 'a') <*> (char 'b')
+
+space :: Parser ()
+space = fmap (const ()) (char ' ')
+
+-- inList :: a -> [a]
+-- inList a =  a:[]
+
+intPair :: Parser [Integer]
+intPair = (\x _ y -> [x, y]) <$> posInt <*> space <*> posInt
