@@ -1,5 +1,7 @@
 
 import AParser
+import Data.Char
+import Control.Applicative
 
 first :: (a -> b) -> Maybe (a,c) -> Maybe (b,c)
 first fn Nothing = Nothing
@@ -11,7 +13,7 @@ instance Functor Parser where
 instance Applicative Parser where
     pure a = Parser { runParser = \s -> Just (a, s) }
     p1 <*> p2 = Parser {
-        runParser =  \x -> case (runParser p1 x) of
+        runParser =  \s -> case (runParser p1 s) of
                                 Nothing -> Nothing
                                 Just (fn, xs) -> first fn (runParser p2 xs)
         }
@@ -22,11 +24,22 @@ abParser = (,) <$> (char 'a') <*> (char 'b')
 abParser_ :: Parser ()
 abParser_ = (\x y -> ()) <$> (char 'a') <*> (char 'b')
 
-space :: Parser ()
-space = fmap (const ()) (char ' ')
+ignoreParser :: Parser a -> Parser ()
+ignoreParser  = fmap (const ())
 
--- inList :: a -> [a]
--- inList a =  a:[]
+spaceParser :: Parser ()
+spaceParser = ignoreParser (char ' ')
 
 intPair :: Parser [Integer]
-intPair = (\x _ y -> [x, y]) <$> posInt <*> space <*> posInt
+intPair = (\x _ y -> [x, y]) <$> posInt <*> spaceParser <*> posInt
+
+instance Alternative Parser where
+    empty = Parser { runParser = \s -> Nothing }
+    p1 <|> p2 = Parser {
+        runParser =  \s -> case (runParser p1 s) of
+                                Nothing ->  (runParser p2 s)
+                                Just (a, xs) ->  Just (a, xs)
+        }
+
+intOrUppercase :: Parser ()
+intOrUppercase = ignoreParser posInt <|> ignoreParser (satisfy isUpper)
